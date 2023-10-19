@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Score Keeper</title>
+  <link rel="stylesheet" type="text/css" href="styles1.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@latest/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Enter Details</h1>
+    <form id="user-form">
+      <div class="form-group">
+        <label for="id">ID:</label>
+        <input type="text" id="id" name="id" required>
+      </div>
+      <div class="form-group">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
+      </div>
+      <div class="form-group">
+        <label for="score">Score:</label>
+        <input type="number" id="score" name="score" min="1" max="100" required>
+      </div>
+      <div class="form-group">
+        <input type="submit" value="Submit" id="submit-button">
+      </div>
+    </form>
+  </div>
+  <script>
+    let students = null;
+    const { createClient } = supabase;
+    const supabaseUrl = 'https://uavvpcvlcfcgoueparwj.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhdnZwY3ZsY2ZjZ291ZXBhcndqIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTc2Mzg0OTIsImV4cCI6MjAxMzIxNDQ5Mn0.EjkfKFz17snJ0wqjLj67RCatwwz-sME7D31MrVujlgM';
+    const _supabase = createClient(supabaseUrl, supabaseKey);
+
+    document.addEventListener('DOMContentLoaded', async function() {
+      async function fetchData() {
+          let { data, error } = await _supabase
+          .from('students')
+          .select('*');
+          
+          students = data;
+      }
+
+      fetchData();
+    });
+
+    async function showFormData(event) {
+      event.preventDefault();
+      const form = document.getElementById('user-form');
+      const formData = new FormData(form);
+      let formObject = {};
+      for (let [key, value] of formData.entries()) {
+        formObject[key] = value;
+      }
+      console.log(formObject);
+
+      const { data, error } = await _supabase
+      .from('students')
+      .insert([
+        { name: formObject.name, score: formObject.rating },
+      ]);
+
+      console.log(data);
+      console.log(error);
+    }
+  </script>
+</body>
+</html>

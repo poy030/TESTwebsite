@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Home Page</title>
+  <link rel="stylesheet" type="text/css" href="styles1.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@latest/dist/umd/supabase.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Home Page</h1>
+    <form id="user-form" onsubmit="showFormData(); return false;">
+      <div class="form-group">
+        <label for="id">ID:</label>
+        <input type="number" id="id" name="id" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="score">Score:</label>
+        <input type="number" id="score" name="score" min="1" max="100" required>
+      </div>
+
+      <div class="form-group">
+        <input type="submit" value="Confirm" class="submit-button">
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const { createClient } = supabase;
+    const supabaseUrl = 'https://uavvpcvlcfcgoueparwj.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhdnZwY3ZsY2ZjZ291ZXBhcndqIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTc2Mzg0OTIsImV4cCI6MjAxMzIxNDQ5Mn0.EjkfKFz17snJ0wqjLj67RCatwwz-sME7D31MrVujlgM'; // Insert your actual Supabase key here
+    const _supabase = createClient(supabaseUrl, supabaseKey);
+
+    async function fetchData() {
+        const { data, error } = await _supabase
+        .from('students')
+        .select('*');
+        
+        if (error) {
+          console.error("Error fetching data:", error);
+          return;
+        }
+        
+        console.log(data);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      fetchData();
+    });
+
+    async function showFormData() {
+      const form = document.getElementById('user-form');
+      const formData = new FormData(form);
+      let formObject = {};
+      for (let [key, value] of formData.entries()) {
+        formObject[key] = value;
+      }
+      
+      // Convert types for proper database insertion
+      formObject.id = parseInt(formObject.id, 10);
+      formObject.score = parseInt(formObject.score, 10);
+      
+      console.log("Sending to server:", formObject);
+      
+      
+      const { data, error } = await _supabase
+      .from('students')
+      .insert([
+          { 
+              id: formObject.id,  // Assuming you want to use formObject
+              name: formObject.name,
+              score: formObject.score
+          },
+      ])
+        .select()
+
+        
+      if (error) {
+        console.error("Error inserting data:", error);
+      } else {
+        console.log("Server responded with:", data);
+      }
+    }
+  </script>
+</body>
+</html>
